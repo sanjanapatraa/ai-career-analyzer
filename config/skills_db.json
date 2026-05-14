@@ -1,0 +1,46 @@
+{
+  "technical_skills": {
+    "programming_languages": [
+      "python", "java", "javascript", "typescript", "c++", "c#", "c",
+      "r", "scala", "kotlin", "swift", "go", "rust", "php", "ruby",
+      "matlab", "julia", "dart", "perl", "bash", "shell", "sql"
+    ],
+    "web_technologies": [
+      "html", "css", "react", "angular", "vue", "next.js", "nuxt",
+      "node.js", "express", "django", "flask", "fastapi", "spring boot",
+      "asp.net", "bootstrap", "tailwind", "graphql", "rest api", "webpack"
+    ],
+    "data_science_ml": [
+      "machine learning", "deep learning", "neural networks",
+      "natural language processing", "nlp", "computer vision",
+      "tensorflow", "pytorch", "keras", "scikit-learn", "xgboost",
+      "pandas", "numpy", "matplotlib", "seaborn", "plotly",
+      "tableau", "power bi", "jupyter", "statistics", "regression",
+      "classification", "clustering", "reinforcement learning",
+      "transformers", "bert", "gpt", "llm", "langchain", "rag",
+      "feature engineering", "data preprocessing", "a/b testing"
+    ],
+    "databases": [
+      "mysql", "postgresql", "mongodb", "redis", "sqlite", "oracle",
+      "sql server", "cassandra", "elasticsearch", "dynamodb",
+      "firebase", "supabase", "neo4j", "bigquery", "snowflake"
+    ],
+    "cloud_devops": [
+      "aws", "azure", "google cloud", "gcp", "docker", "kubernetes",
+      "terraform", "ansible", "jenkins", "github actions", "ci/cd",
+      "linux", "git", "github", "gitlab", "nginx", "apache",
+      "microservices", "serverless", "lambda", "ec2", "s3"
+    ],
+    "tools": [
+      "vs code", "intellij", "pycharm", "jupyter notebook", "postman",
+      "jira", "confluence", "figma", "adobe xd", "git", "linux",
+      "windows", "macos", "excel", "word", "powerpoint"
+    ]
+  },
+  "soft_skills": [
+    "communication", "teamwork", "leadership", "problem solving",
+    "critical thinking", "time management", "adaptability",
+    "creativity", "attention to detail", "project management",
+    "collaboration", "mentoring", "public speaking", "analytical"
+  ]
+}
