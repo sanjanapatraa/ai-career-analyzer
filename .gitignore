@@ -39,3 +39,5 @@ Thumbs.db
 
 *.pkl
 data/processed/
+
+.env

@@ -1,0 +1,9 @@
+{
+  "accuracy_scores": {
+    "random_forest": 1.0,
+    "xgboost": 0.9833333333333333,
+    "logistic_regression": 0.7416666666666667,
+    "ensemble": 1.0
+  },
+  "best_model": "random_forest"
+}
