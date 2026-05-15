@@ -1,0 +1,37 @@
+Rahul Kumar
+rahul.kumar123@gmail.com
+9876543210
+
+OBJECTIVE
+I am a computer science student looking for a job in software development.
+I have knowledge of programming languages and want to learn more.
+
+EDUCATION
+B.Tech Computer Science — ABC Engineering College, Pune (2024)
+Percentage: 72%
+
+SKILLS
+- C, C++, Java, Python (basic)
+- HTML, CSS
+- MS Office (Word, Excel, PowerPoint)
+- Problem Solving
+- Communication skills
+- Team player
+
+PROJECTS
+1. Library Management System — Created a library management system using Java
+2. Calculator App — Made a calculator using HTML and CSS
+
+INTERNSHIP
+Web Developer Intern — XYZ Company (June 2023 - August 2023)
+- Worked on website development
+- Learned about web technologies
+- Assisted senior developers
+
+HOBBIES
+- Playing cricket
+- Watching movies
+- Listening to music
+
+DECLARATION
+I hereby declare that all the information provided above is true and correct.

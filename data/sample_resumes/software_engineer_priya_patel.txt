@@ -1,0 +1,49 @@
+PRIYA PATEL
+Software Engineer | priya.patel@gmail.com | +91-9123456789
+GitHub: github.com/priyapatel | Portfolio: priyapatel.dev
+
+SUMMARY
+Full-stack Software Engineer with 3 years of experience building scalable web
+applications and microservices. Strong foundation in system design, distributed
+systems, and cloud technologies. Passionate about writing clean, testable code.
+
+SKILLS
+Languages:    Java, Python, JavaScript, TypeScript, Go, C++
+Backend:      Spring Boot, Node.js, FastAPI, Django, gRPC, REST, GraphQL
+Frontend:     React.js, Next.js, TypeScript, HTML5, CSS3, Tailwind CSS
+Databases:    PostgreSQL, MySQL, MongoDB, Redis, Elasticsearch, DynamoDB
+Cloud/DevOps: AWS, Docker, Kubernetes, Jenkins, GitHub Actions, Terraform
+Testing:      JUnit, Pytest, Jest, Selenium, Postman
+Tools:        Git, JIRA, Confluence, IntelliJ, VS Code, Linux/Unix
+
+EXPERIENCE
+
+Software Engineer II — Amazon India (2022-Present)
+- Designed and built microservices handling 2M+ requests/day using Java Spring Boot
+- Reduced API response time by 40% through database query optimization and caching
+- Led backend development of new checkout feature, increasing revenue by $1.5M/quarter
+- Implemented distributed tracing using AWS X-Ray for 20+ microservices
+- Mentored 3 junior engineers and conducted technical interviews
+
+Software Engineer — Flipkart (2021-2022)
+- Built real-time inventory management system using Kafka and Redis
+- Developed GraphQL API consumed by mobile and web clients (5M+ users)
+- Reduced system downtime from 2% to 0.01% through improved error handling
+- Wrote comprehensive unit and integration tests (95% coverage)
+
+EDUCATION
+B.Tech in Computer Science — BITS Pilani (2021) — CGPA: 9.1/10
+
+CERTIFICATIONS
+- AWS Certified Solutions Architect — Associate
+- Oracle Certified Professional Java SE 11
+
+PROJECTS
+- Distributed Task Queue: Go-based task queue supporting 100K tasks/second
+- E-Commerce Platform: Full-stack app with React + Node.js + PostgreSQL
+- Open Source: Contributed to Spring Framework (150+ GitHub stars)
+
+ACHIEVEMENTS
+- Best Employee Award — Amazon Q3 2023
+- Competitive Programming: Expert on Codeforces (Rating: 1850)
+- Google Summer of Code 2020 — Apache Software Foundation

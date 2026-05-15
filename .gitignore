@@ -36,3 +36,6 @@ Thumbs.db
 
 # VS Code settings
 .vscode/
+
+*.pkl
+data/processed/
