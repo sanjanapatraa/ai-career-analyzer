@@ -147,11 +147,11 @@ ai-career-analyzer/
 ## 👤 Author
 
 Sanjana Patra — B.Tech Computer Science  
-📧 your.email@gmail.com  
+📧 sanjanapatra421@gmail.com  
 🔗 [LinkedIn](https://www.linkedin.com/in/sanjana-patra-5499bb2bb/) | [GitHub](https://github.com/sanjanapatraa)
 
 ---
-
 ## 📄 License
+
 
 MIT License — free to use, modify and distribute.
