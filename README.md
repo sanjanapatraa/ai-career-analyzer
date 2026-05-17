@@ -10,7 +10,7 @@
 > A production-grade, premium SaaS-style AI resume analyzer that scores resumes against real ATS systems, predicts career paths, identifies skill gaps, and provides personalized improvement recommendations.
 
 ## 🌐 Live Demo
-**[Try it live → resumeiq.streamlit.app](https://your-app.streamlit.app)**
+**[Try it live → resumeiq.streamlit.app](https://ai-career-analyzer-yxyzgubyzwcnlbued9sxsl.streamlit.app)**
 
 ---
 
