@@ -4,7 +4,6 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-*.egg
 *.egg-info/
 dist/
 build/
@@ -15,29 +14,27 @@ venv/
 env/
 ENV/
 
-# Environment variables (NEVER upload your API keys!)
+# Environment variables — NEVER upload API keys
 .env
 
-# Model files (too large for GitHub)
+# Large model files
 models/*.pkl
 models/*.joblib
 models/*.h5
 
-# Data files (too large for GitHub)
+# Large data files
 data/raw/*
 data/processed/*
 
-# Jupyter checkpoints
+# Jupyter
 .ipynb_checkpoints/
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
-# VS Code settings
+# VS Code
 .vscode/
 
-*.pkl
-data/processed/
-
-.env
+# Temp files
+temp_report.pdf
