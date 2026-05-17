@@ -146,9 +146,9 @@ ai-career-analyzer/
 
 ## 👤 Author
 
-**Your Name** — B.Tech Computer Science  
+Sanjana Patra — B.Tech Computer Science  
 📧 your.email@gmail.com  
-🔗 [LinkedIn](https://linkedin.com/in/yourprofile) | [GitHub](https://github.com/yourusername)
+🔗 [LinkedIn](https://www.linkedin.com/in/sanjana-patra-5499bb2bb/) | [GitHub](https://github.com/sanjanapatraa)
 
 ---
 
