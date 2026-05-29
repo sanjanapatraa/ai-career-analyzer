@@ -23,8 +23,13 @@ import os
 import logging
 from typing import Dict, List, Set, Optional, Tuple
 
-import spacy
-from spacy.matcher import PhraseMatcher   # For matching skill phrases
+try:
+    import spacy
+    from spacy.matcher import PhraseMatcher   # For matching skill phrases
+except Exception as exc:
+    spacy = None
+    PhraseMatcher = None
+    logging.warning(f"spaCy unavailable. Falling back to regex skill extraction: {exc}")
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +122,8 @@ class SkillExtractor:
         # We only need: tokenizer (built-in), lemmatizer, tagger
         # We do NOT need: ner (named entity recognition), parser (dependency parsing)
         try:
+            if spacy is None:
+                raise RuntimeError("spaCy is not available")
             self.nlp = spacy.load(
                 "en_core_web_sm",
             
@@ -125,8 +132,8 @@ class SkillExtractor:
             # Increase max text length (resumes can be long)
             self.nlp.max_length = 2_000_000
             logger.info("spaCy model loaded successfully")
-        except OSError:
-            logger.error("spaCy model not found. Run: python -m spacy download en_core_web_sm")
+        except Exception as exc:
+            logger.error(f"spaCy model unavailable. Regex fallback remains active: {exc}")
             self.nlp = None
 
         # Build the PhraseMatcher with all known skills

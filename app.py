@@ -1,51 +1,59 @@
-# app.py
-# ══════════════════════════════════════════════════════════════════════════
-# ResumeIQ — Premium ATS Resume Analyzer
-# Main Streamlit entry point — redesigned as a production SaaS platform
-# Run: streamlit run app.py
-# ══════════════════════════════════════════════════════════════════════════
+import os
+import sys
 
 import streamlit as st
-import sys, os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
 from dotenv import load_dotenv
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv()
 
-# ── Page config — MUST be first Streamlit call ─────────────────────────────
 st.set_page_config(
-    page_title   = "ResumeIQ — AI-Powered ATS Analyzer",
-    page_icon    = "🎯",
-    layout       = "wide",
-    initial_sidebar_state = "expanded",
+    page_title="ResumeIQ - AI ATS Career Platform",
+    page_icon="RI",
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-# ── Inject all custom CSS ──────────────────────────────────────────────────
-from ui.styles import inject_styles
-inject_styles()
+DEFAULTS = {
+    "page": "landing",
+    "analysis_result": None,
+    "chat_history": [],
+    "jd_text": "",
+    "target_level": "mid",
+    "education_req": "bachelor",
+}
 
-# ── Route to the correct page ──────────────────────────────────────────────
-# We use session_state to track which "page" the user is on.
-# Streamlit re-runs the whole script on every interaction, so
-# session_state is how we remember things between runs.
-if "page" not in st.session_state:
-    st.session_state.page = "landing"
+for key, value in DEFAULTS.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
 
-if "analysis_result" not in st.session_state:
-    st.session_state.analysis_result = None
+from ui.styles import inject_css
 
-if "dark_mode" not in st.session_state:
-    st.session_state.dark_mode = False
+inject_css()
 
-# ── Import page modules ────────────────────────────────────────────────────
-from ui.landing   import show_landing
-from ui.analyzer  import show_analyzer
-from ui.dashboard import show_dashboard
+page = st.session_state.page
 
-# ── Render the correct page ────────────────────────────────────────────────
-if st.session_state.page == "landing":
+if page == "landing":
+    from ui.landing import show_landing
+
     show_landing()
-elif st.session_state.page == "analyzer":
-    show_analyzer()
-elif st.session_state.page == "dashboard":
-    show_dashboard()
+else:
+    from ui.nav import sidebar, topbar
+
+    sidebar(page)
+    topbar(page)
+
+    routes = {
+        "dashboard": ("ui.dashboard", "show_dashboard"),
+        "analyzer": ("ui.analyzer", "show_analyzer"),
+        "career": ("ui.career", "show_career"),
+        "jobmatch": ("ui.jobmatch", "show_jobmatch"),
+        "chatbot": ("ui.chatbot", "show_chatbot"),
+        "interview": ("ui.interview", "show_interview"),
+        "roadmap": ("ui.roadmap", "show_roadmap"),
+        "recruiter": ("ui.recruiter", "show_recruiter"),
+    }
+
+    module_name, function_name = routes.get(page, routes["dashboard"])
+    module = __import__(module_name, fromlist=[function_name])
+    getattr(module, function_name)()

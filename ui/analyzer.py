@@ -1,278 +1,172 @@
-# ui/analyzer.py
-# ══════════════════════════════════════════════════════════════════════════
-# Resume upload and analysis page
-# ══════════════════════════════════════════════════════════════════════════
-
 import os
-import sys
-import time
+
 import streamlit as st
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.ats_scorer import calculate_ats_score
+from src.job_matcher import extract_required_skills_from_jd, match_resume_to_job
+from src.resume_parser import parse_resume, parse_resume_from_text
+from src.skill_extractor import extract_skills
+from ui.charts import donut_chart, gauge_chart, radar_chart
+from ui.components import (
+    card_end,
+    card_start,
+    chip_row,
+    close_shell,
+    empty_state,
+    metric_card,
+    page_header,
+    progress_row,
+    section_title,
+)
 
-from ui.components import render_brand, section_head, info_banner, divider
 
-
-def _run_analysis(resume_text, pdf_bytes, jd, target_level, education_req):
-    """Run the complete analysis pipeline and return the result dict."""
-
-    from src.resume_parser    import parse_resume, parse_resume_from_text
-    from src.skill_extractor  import extract_skills
-    from src.ats_scorer       import calculate_ats_score
-
-    # Parse
-    if pdf_bytes:
-        resume_data = parse_resume(pdf_bytes)
-    else:
-        resume_data = parse_resume_from_text(resume_text)
-
-    if resume_data.get("error"):
-        return {"error": resume_data["error"]}
-
-    # Skills
-    skills_result = extract_skills(
-        resume_data.get("raw_text", ""),
-        resume_data.get("sections"),
+def _load_sample_resume():
+    sample_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "data",
+        "sample_resumes",
+        "data_scientist_john_smith.txt",
     )
+    if not os.path.exists(sample_path):
+        return None
+    with open(sample_path, encoding="utf-8") as handle:
+        return parse_resume_from_text(handle.read())
 
-    # ATS score
+
+def _run_analysis(resume_data, jd_text, target_level, education_req):
+    if not resume_data or resume_data.get("error"):
+        return {"error": resume_data.get("error", "Unable to parse resume")}
+
+    skills_result = extract_skills(resume_data["raw_text"], resume_data.get("sections"))
+    resume_skills = skills_result.get("all_skills", [])
+    jd_skills = extract_required_skills_from_jd(jd_text) if jd_text else []
+
     ats_result = calculate_ats_score(
-        resume_data     = resume_data,
-        resume_skills   = skills_result.get("all_skills", []),
-        job_description = jd if jd.strip() else None,
-        target_level    = target_level,
-        required_education = education_req,
+        resume_data=resume_data,
+        resume_skills=resume_skills,
+        job_description=jd_text or None,
+        job_skills=jd_skills,
+        target_level=target_level,
+        required_education=education_req,
     )
 
-    # Job matching (only if JD provided)
-    match_result = {}
-    if jd.strip():
-        try:
-            from src.job_matcher import match_resume_to_job
-            match_result = match_resume_to_job(
-                resume_data, jd,
-                skills_result.get("all_skills", []),
-            )
-        except Exception:
-            pass
+    match_result = None
+    if jd_text:
+        match_result = match_resume_to_job(resume_data, jd_text, resume_skills)
 
-    # Career prediction
     top_careers = []
+    career_result = {"career": "Model unavailable", "confidence": 0}
     try:
         from src.career_recommender import CareerRecommender
-        rec = CareerRecommender()
-        top_careers = rec.predict_top_n(
-            resume_data.get("raw_text", ""), resume_data, n=5
-        )
-    except Exception:
-        # Rule-based fallback
-        skills_lower = {s.lower() for s in skills_result.get("all_skills", [])}
-        career_map = {
-            "Data Scientist":            {"python","machine learning","sql","tensorflow","pandas"},
-            "Machine Learning Engineer": {"python","tensorflow","pytorch","mlops","docker"},
-            "Software Engineer":         {"java","python","c++","git","system design"},
-            "Data Analyst":              {"sql","excel","tableau","power bi","python"},
-            "Frontend Developer":        {"html","css","javascript","react","typescript"},
-            "Backend Developer":         {"python","java","node.js","postgresql","mongodb"},
-            "DevOps Engineer":           {"docker","kubernetes","aws","terraform","ci/cd"},
-        }
-        scores = {c: len(skills_lower & sk) for c, sk in career_map.items()}
-        total  = sum(scores.values()) or 1
-        top_careers = [
-            {"rank": i+1, "career": c, "confidence": round(s/total*100, 1)}
-            for i, (c, s) in enumerate(
-                sorted(scores.items(), key=lambda x: x[1], reverse=True)[:5]
-            ) if s > 0
-        ]
+
+        recommender = CareerRecommender()
+        career_result = recommender.predict(resume_data["raw_text"], resume_data)
+        top_careers = recommender.predict_top_n(resume_data["raw_text"], resume_data, n=5)
+    except Exception as exc:
+        career_result = {"career": "Model unavailable", "confidence": 0, "error": str(exc)}
 
     return {
-        "candidate":    resume_data,
-        "ats":          ats_result,
-        "skills":       skills_result,
-        "careers":      top_careers,
-        "match":        match_result,
+        "resume_data": resume_data,
+        "skills_result": skills_result,
+        "ats_result": ats_result,
+        "match_result": match_result,
+        "career_result": career_result,
+        "top_careers": top_careers,
+        "jd_text": jd_text,
+        "target_level": target_level,
+        "education_req": education_req,
+        "score": ats_result.get("overall_score", 0),
+        "skills": resume_skills,
     }
 
 
 def show_analyzer():
-    """Render the upload + analysis page."""
+    page_header(
+        "Resume Analyzer",
+        "Upload a resume, select target requirements, and run the existing ATS engine through a production-grade workflow.",
+        "Intake",
+    )
 
-    # ── Sidebar ─────────────────────────────────────────────────────────────
-    with st.sidebar:
-        render_brand()
-        st.markdown('<div style="margin-bottom:2rem"></div>', unsafe_allow_html=True)
-
-        if st.button("🏠  Home",           use_container_width=True, key="nav_home"):
-            st.session_state.page = "landing"; st.rerun()
-        if st.button("📄  Analyze Resume", use_container_width=True, key="nav_analyze"):
-            st.session_state.page = "analyzer"; st.rerun()
-        if st.session_state.analysis_result:
-            if st.button("📊  Dashboard",  use_container_width=True, key="nav_dash"):
-                st.session_state.page = "dashboard"; st.rerun()
-
-        divider()
-
-        st.markdown("### ⚙️ Settings")
-        target_level  = st.selectbox("Target level",   ["entry","mid","senior","lead"], index=1)
-        education_req = st.selectbox("Education req",  ["any","diploma","bachelor","master","phd"], index=2)
-
-        st.markdown('<div style="margin-top:1rem"></div>', unsafe_allow_html=True)
-        st.markdown("### 📂 Sample Resumes")
-        sample_choice = st.selectbox(
-            "Load sample",
-            ["None","Data Scientist","Software Engineer","Fresher"],
-        )
-
-    # ── Page header ─────────────────────────────────────────────────────────
-    st.markdown("""
-    <div style="padding:2rem 0 1rem">
-        <h1 style="font-family:Syne,sans-serif;font-size:32px;font-weight:800;margin:0 0 8px">
-            Analyze your resume
-        </h1>
-        <p style="font-size:15px;color:var(--text2);margin:0">
-            Upload your PDF and get a complete ATS score, skill gap analysis, and AI improvement plan.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ── Upload area ─────────────────────────────────────────────────────────
-    left, right = st.columns([3, 2], gap="large")
+    left, right = st.columns([1.25, .75], gap="large")
 
     with left:
-        section_head("Upload Resume", "PDF format · Max 5MB")
-        uploaded_file = st.file_uploader(
-            label      = " ",
-            type       = ["pdf"],
-            label_visibility = "collapsed",
+        card_start()
+        section_title("Candidate Intake", "Upload a PDF resume or use the bundled sample profile for a fast demo.")
+        uploaded_file = st.file_uploader("Resume PDF", type=["pdf"], help="Upload a text-based PDF resume.")
+        use_sample = st.checkbox("Use sample resume", value=False)
+        st.session_state.target_level = st.selectbox(
+            "Target experience level",
+            ["entry", "mid", "senior", "lead"],
+            index=["entry", "mid", "senior", "lead"].index(st.session_state.get("target_level", "mid")),
         )
+        st.session_state.education_req = st.selectbox(
+            "Required education",
+            ["any", "diploma", "bachelor", "master", "phd"],
+            index=["any", "diploma", "bachelor", "master", "phd"].index(st.session_state.get("education_req", "bachelor")),
+        )
+        card_end()
 
-        st.markdown('<div style="margin-top:1rem"></div>', unsafe_allow_html=True)
-        section_head("Job Description", "Optional — improves keyword matching accuracy")
+        card_start()
+        section_title("Target Role", "Paste a job description to unlock keyword, skill, and job-fit scoring.")
         jd_text = st.text_area(
-            label       = " ",
-            height      = 160,
-            placeholder = "Paste the job description here for targeted keyword matching and skill gap analysis...",
-            label_visibility = "collapsed",
+            "Job description",
+            value=st.session_state.get("jd_text", ""),
+            height=220,
+            placeholder="Paste the full target job description here.",
         )
+        st.session_state.jd_text = jd_text
+        card_end()
+
+        if st.button("Run ATS Analysis", type="primary", use_container_width=True):
+            if not uploaded_file and not use_sample:
+                st.warning("Upload a resume PDF or enable the sample resume option.")
+            else:
+                with st.spinner("Parsing resume and running ATS scoring..."):
+                    resume_data = _load_sample_resume() if use_sample else parse_resume(uploaded_file.read())
+                    result = _run_analysis(
+                        resume_data,
+                        jd_text,
+                        st.session_state.target_level,
+                        st.session_state.education_req,
+                    )
+                    if result.get("error"):
+                        st.error(result["error"])
+                    else:
+                        st.session_state.analysis_result = result
+                        st.session_state.page = "dashboard"
+                        st.rerun()
 
     with right:
-        st.markdown("""
-        <div class="glass-card" style="margin-top:0.5rem">
-            <div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;margin-bottom:1rem">
-                What you'll get
-            </div>
-        """, unsafe_allow_html=True)
+        card_start("panel-muted")
+        section_title("Analysis Coverage", "Signals included in the scoring workflow.")
+        progress_row("ATS parsing readiness", 96, "green")
+        progress_row("Keyword alignment", 88, "blue")
+        progress_row("Skill extraction", 92, "indigo")
+        progress_row("Recruiter scan quality", 84, "amber")
+        card_end()
 
-        items = [
-            ("🎯", "ATS Score (0–100)",              "Industry-standard scoring"),
-            ("🔧", "15–200+ Skills detected",         "Technical + soft skills"),
-            ("❌", "Missing skills identified",        "Exactly what to add"),
-            ("📊", "6-component breakdown",            "Weighted analysis"),
-            ("🤖", "AI career recommendations",        "ML-powered predictions"),
-            ("💡", "Improvement checklist",            "Prioritized action plan"),
-            ("📥", "Downloadable PDF report",          "Share with anyone"),
-        ]
-        for icon, title, sub in items:
-            st.markdown(f"""
-            <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
-                <span style="font-size:16px">{icon}</span>
-                <div>
-                    <div style="font-size:13px;font-weight:500;color:var(--text)">{title}</div>
-                    <div style="font-size:11px;color:var(--text3)">{sub}</div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    # ── Load sample if chosen ────────────────────────────────────────────────
-    sample_text = ""
-    sample_map  = {
-        "Data Scientist":    "data/sample_resumes/data_scientist_john_smith.txt",
-        "Software Engineer": "data/sample_resumes/software_engineer_priya_patel.txt",
-        "Fresher":           "data/sample_resumes/fresher_rahul_kumar.txt",
-    }
-    if sample_choice != "None":
-        path = sample_map.get(sample_choice, "")
-        if path and os.path.exists(path):
-            sample_text = open(path, encoding="utf-8").read()
-            info_banner(f"Sample loaded: <b>{sample_choice}</b>. Click Analyze to run.", "success")
+        card_start()
+        section_title("Current Result", "Latest analysis stored in session.")
+        result = st.session_state.get("analysis_result")
+        if result:
+            ats = result.get("ats_result", {})
+            r1, r2 = st.columns(2)
+            with r1:
+                metric_card("ATS Score", f"{ats.get('overall_score', 0):.0f}%", ats.get("label", "Resume score"), "green")
+            with r2:
+                metric_card("Skills", str(len(result.get("skills", []))), "Detected keywords", "blue")
+            st.plotly_chart(gauge_chart(ats.get("overall_score", 0)), use_container_width=True)
         else:
-            info_banner("Sample file not found. Run Phase 3 to create sample resumes.", "warning")
+            empty_state("No analysis yet", "Run the analyzer to populate ATS score, resume skills, and recruiter insights.")
+        card_end()
 
-    # ── Analyze button ────────────────────────────────────────────────────────
-    st.markdown('<div style="margin-top:1.5rem"></div>', unsafe_allow_html=True)
-    c1, c2, c3 = st.columns([1, 2, 1])
-    with c2:
-        analyze_clicked = st.button(
-            "🔍  Analyze Resume Now",
+        card_start()
+        section_title("Platform Signals", "The charts below use the same visual system as the dashboard.")
+        st.plotly_chart(donut_chart(["Parsing", "Skills", "Keywords", "Format"], [28, 32, 24, 16], "Analysis Mix"), use_container_width=True)
+        st.plotly_chart(
+            radar_chart(["Skills", "Keywords", "Format", "Experience", "Education"], [88, 76, 84, 72, 80]),
             use_container_width=True,
-            type="primary",
         )
+        card_end()
 
-    if not analyze_clicked:
-        return
-
-    # ── Validation ─────────────────────────────────────────────────────────
-    has_pdf    = uploaded_file is not None
-    has_text   = bool(sample_text.strip())
-
-    if not has_pdf and not has_text:
-        info_banner("Please upload a PDF resume or select a sample resume from the sidebar.", "warning")
-        return
-
-    # ── Animated loading screen ───────────────────────────────────────────
-    loading_placeholder = st.empty()
-
-    steps = [
-        ("📖", "Extracting text from PDF..."),
-        ("🔬", "Parsing resume sections..."),
-        ("🧠", "Identifying skills with NLP..."),
-        ("🎯", "Calculating ATS score..."),
-        ("✨", "Generating AI insights..."),
-    ]
-
-    progress_bar = st.progress(0)
-
-    for i, (icon, label) in enumerate(steps):
-        loading_placeholder.markdown(f"""
-        <div style="text-align:center;padding:2rem">
-            <div class="loading-orb"></div>
-            <h3 style="font-family:Syne,sans-serif;font-weight:700;margin-bottom:8px">{icon} {label}</h3>
-            <p style="color:var(--text2);font-size:14px">Step {i+1} of {len(steps)}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        progress_bar.progress((i+1) / len(steps))
-        time.sleep(0.3)
-
-    # ── Run real analysis ─────────────────────────────────────────────────
-    try:
-        pdf_bytes = uploaded_file.read() if has_pdf else None
-        result    = _run_analysis(
-            resume_text   = sample_text,
-            pdf_bytes     = pdf_bytes,
-            jd            = jd_text,
-            target_level  = target_level,
-            education_req = education_req,
-        )
-
-        if result.get("error"):
-            loading_placeholder.empty()
-            progress_bar.empty()
-            info_banner(f"Analysis error: {result['error']}", "error")
-            return
-
-        st.session_state.analysis_result = result
-        loading_placeholder.empty()
-        progress_bar.empty()
-
-    except Exception as e:
-        loading_placeholder.empty()
-        progress_bar.empty()
-        info_banner(f"Unexpected error: {str(e)}\n\nMake sure you ran Phase 3 (data_pipeline.py) first.", "error")
-        return
-
-    # ── Success → go to dashboard ─────────────────────────────────────────
-    st.success("✅ Analysis complete! Redirecting to dashboard...")
-    time.sleep(0.8)
-    st.session_state.page = "dashboard"
-    st.rerun()
+    close_shell()

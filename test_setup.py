@@ -55,4 +55,4 @@ try:
     print([token.text for token in doc])
 
 except Exception as e:
-    print(f"✗ spaCy model failed: {e}")D
+    print(f"✗ spaCy model failed: {e}")

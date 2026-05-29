@@ -1,157 +1,116 @@
-# 🎯 ResumeIQ — AI-Powered ATS Resume Analyzer
+# ResumeIQ - AI ATS and Career Platform
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.32-red?style=flat-square)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-1.4-orange?style=flat-square)
-![spaCy](https://img.shields.io/badge/spaCy-3.7-green?style=flat-square)
-![Plotly](https://img.shields.io/badge/Plotly-5.20-blue?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+ResumeIQ is a production-style Streamlit application for resume analysis, ATS scoring, job matching, career guidance, recruiter analytics, interview preparation, and learning roadmaps. It is designed as a polished final-year project with a modern SaaS dashboard experience.
 
-> A production-grade, premium SaaS-style AI resume analyzer that scores resumes against real ATS systems, predicts career paths, identifies skill gaps, and provides personalized improvement recommendations.
+## Live Demo
 
-## 🌐 Live Demo
-**[Try it live → resumeiq.streamlit.app](https://ai-career-analyzer-yxyzgubyzwcnlbued9sxsl.streamlit.app)**
+Streamlit Cloud deployment:
 
----
+https://ai-career-analyzer-yxyzgubyzwcnlbued9sxsl.streamlit.app
 
-## ✨ Features
+## Key Features
 
-| Feature | Description |
-|---|---|
-| 🎯 ATS Score Engine | 6-component weighted scoring — industry calibrated to 94% accuracy |
-| 🧠 NLP Skill Extraction | spaCy PhraseMatcher + regex detects 200+ technical and soft skills |
-| 📊 Premium Dashboard | 6-tab recruiter-grade analytics with Plotly charts |
-| 🔍 Keyword Optimizer | TF-IDF + Cosine Similarity job description matching |
-| 🤖 Career Recommender | ML ensemble (Random Forest + XGBoost) predicts best career paths |
-| 💬 AI Career Chatbot | Claude-powered advisor for career questions |
-| 🎤 Interview Prep | Auto-generates role-specific questions and ideal answers |
-| 👥 Recruiter View | Multi-candidate ranking, comparison radar, hiring recommendation |
-| 📥 PDF Report | Downloadable formatted analysis report |
-| 🗺️ Learning Roadmap | Step-by-step career development plans |
+| Module | Capability |
+| --- | --- |
+| Resume Analyzer | Upload a PDF resume or use a sample profile and run structured analysis |
+| ATS Dashboard | View score breakdowns, recruiter signals, skill gaps, and candidate snapshots |
+| Job Match | Compare a resume against a job description using TF-IDF, skill matching, and experience checks |
+| Career Match | Display model-backed career recommendations when trained artifacts are available |
+| AI Career Coach | Provide contextual coaching from the latest resume analysis |
+| Interview Prep | Generate practical role-specific interview focus areas |
+| Learning Roadmap | Build a short action plan from missing skills and improvement signals |
+| Recruiter Analytics | Present shortlist-ready hiring metrics and candidate review tables |
 
----
+## Tech Stack
 
-## 🏗️ Architecture
+- Python 3.10+
+- Streamlit
+- Plotly
+- pandas and NumPy
+- PyMuPDF and pdfplumber
+- spaCy with graceful regex fallback
+- scikit-learn and XGBoost
+- fpdf2
 
-```
-PDF Resume
-    ↓
-Text Extraction (PyMuPDF + pdfplumber)
-    ↓
-Section Parsing (regex + spaCy NER)
-    ↓
-Skill Extraction (PhraseMatcher + regex)
-    ↓
-TF-IDF Vectorization → ML Classification
-    ↓
-ATS Scoring (6 weighted components)
-    ↓
-Premium Streamlit Dashboard (Plotly charts)
-```
-
----
-
-## 🚀 Run Locally
+## Local Setup
 
 ```bash
-# 1. Clone
-git clone https://github.com/YOUR_USERNAME/ai-career-analyzer.git
+git clone https://github.com/sanjanapatraa/ai-career-analyzer.git
 cd ai-career-analyzer
 
-# 2. Virtual environment
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+venv\Scripts\activate
 
-# 3. Install dependencies
 pip install -r requirements.txt
-python -m spacy download en_core_web_lg
+python -m spacy download en_core_web_sm
 
-# 4. Environment variables
-echo "ANTHROPIC_API_KEY=your_key_here" > .env
-
-# 5. Build data and train models
-python src/data_pipeline.py
-python src/career_recommender.py
-
-# 6. Create sample resumes
-python data/create_samples.py
-
-# 7. Run the app
 streamlit run app.py
 ```
 
----
+Open:
 
-## 📁 Project Structure
-
+```text
+http://localhost:8501
 ```
+
+## Streamlit Cloud Deployment
+
+This repository is ready for Streamlit Cloud.
+
+Deployment settings:
+
+```text
+Repository: sanjanapatraa/ai-career-analyzer
+Branch: main
+Main file path: app.py
+Python dependencies: requirements.txt
+System packages: packages.txt
+```
+
+The app does not require secrets for the core resume analyzer, ATS dashboard, job matching, recruiter analytics, roadmap, or interview-prep screens.
+
+## Project Structure
+
+```text
 ai-career-analyzer/
-├── app.py                        # Main entry point
+├── app.py
 ├── ui/
-│   ├── styles.py                 # All CSS — premium dark SaaS theme
-│   ├── components.py             # Reusable HTML components
-│   ├── charts.py                 # Plotly chart helpers
-│   ├── landing.py                # Landing page
-│   ├── analyzer.py               # Upload + analysis page
-│   └── dashboard.py              # 6-tab analytics dashboard
+│   ├── analyzer.py
+│   ├── career.py
+│   ├── charts.py
+│   ├── chatbot.py
+│   ├── components.py
+│   ├── dashboard.py
+│   ├── interview.py
+│   ├── jobmatch.py
+│   ├── landing.py
+│   ├── nav.py
+│   ├── recruiter.py
+│   ├── roadmap.py
+│   └── styles.py
 ├── src/
-│   ├── resume_parser.py          # PDF text extraction
-│   ├── skill_extractor.py        # NLP skill detection
-│   ├── career_recommender.py     # ML career prediction
-│   ├── ats_scorer.py             # ATS scoring engine
-│   ├── job_matcher.py            # Resume-JD matching
-│   ├── report_generator.py       # PDF report generation
-│   └── utils.py                  # Shared utilities
-├── data/
-│   ├── sample_resumes/           # Test resumes
-│   ├── raw/                      # Raw datasets
-│   └── processed/                # ML-ready data
-├── models/                       # Saved ML models (.pkl)
+│   ├── ats_scorer.py
+│   ├── career_recommender.py
+│   ├── job_matcher.py
+│   ├── report_generator.py
+│   ├── resume_parser.py
+│   ├── skill_extractor.py
+│   └── utils.py
 ├── config/
-│   ├── settings.py               # App configuration
-│   └── skills_db.json            # 200+ skills database
+│   └── skills_db.json
+├── data/
+│   └── sample_resumes/
 ├── tests/
-│   └── test_all.py               # 38-test pytest suite
+│   └── test_all.py
 ├── .streamlit/
-│   └── config.toml               # Dark theme config
-├── requirements.txt
-└── README.md
+│   └── config.toml
+├── packages.txt
+└── requirements.txt
 ```
 
----
+## Verification
 
-## 🧠 ML Model Performance
-
-| Model | Accuracy |
-|---|---|
-| Random Forest (200 trees) | ~94% |
-| XGBoost (200 rounds) | ~92% |
-| Logistic Regression | ~91% |
-| **Ensemble Voting** | **~95%** |
-
----
-
-## 📊 ATS Scoring Weights
-
-| Component | Weight |
-|---|---|
-| Skill Match | 35% |
-| Keyword Density | 20% |
-| Format Quality | 15% |
-| Experience Match | 15% |
-| Education Match | 10% |
-| Contact Info | 5% |
-
----
-
-## 👤 Author
-
-Sanjana Patra — B.Tech Computer Science  
-📧 sanjanapatra421@gmail.com  
-🔗 [LinkedIn](https://www.linkedin.com/in/sanjana-patra-5499bb2bb/) | [GitHub](https://github.com/sanjanapatraa)
-
----
-## 📄 License
-
-
-MIT License — free to use, modify and distribute.
+```bash
+python -m compileall app.py ui src/skill_extractor.py test_setup.py
+python -m pytest -q
+```
